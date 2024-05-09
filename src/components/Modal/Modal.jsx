@@ -1,28 +1,46 @@
-import Modal from 'react-modal';
-import css from './Modal.module.css';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { Overlay, ModalDiv } from './Modal.styled'
 
-Modal.setAppElement('#root');
+class Modal extends Component {
+  componentDidMount() {
+    window.addEventListener('keydown', this.handleKeyDown);    
+  }
 
-const ImageModal = ({ modalClose, isModalOpen, image }) => {
-  return (
-    <Modal
-      onRequestClose={modalClose}
-      isOpen={isModalOpen}
-      contentLabel="Image Modal"
-      className={css.overlay}
-    >
-      <div className={css.modal}>
-        <img src={image} alt="Image" />
-      </div>
-    </Modal>
-  );
+  componentWillUnmount() {
+    window.removeEventListener('keydown', this.handleKeyDown);
+  }
+
+  handleKeyDown = event => {
+    if (event.code === 'Escape') {
+      this.props.onClose();
+    }
+  };
+
+  handleClick = event => {
+    if (event.target === event.currentTarget) {
+      this.props.onClose();
+    }
+  };
+
+  render() {
+    const { image } = this.props;
+
+    return (
+      <Overlay onClick={this.handleClick}>
+        <ModalDiv>
+          <img src={image.largeImageURL} alt={ image.tags } />
+        </ModalDiv>
+      </Overlay>
+    );
+  }
+}
+
+Modal.propTypes = {
+  image: PropTypes.shape({
+    largeImageURL: PropTypes.string.isRequired,
+  }).isRequired,
+  onClose: PropTypes.func.isRequired,
 };
 
-ImageModal.propTypes = {
-  modalClose: PropTypes.func.isRequired,
-  isModalOpen: PropTypes.bool.isRequired,
-  image: PropTypes.string.isRequired, // Changed to specify image as string
-};
-
-export default ImageModal;
+export default Modal;
